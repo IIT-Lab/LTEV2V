@@ -50,7 +50,7 @@ elseif simParams.BRAlgorithm==102
 elseif simParams.BRAlgorithm==7
     % Call first assignment of BR Algorithm 7 (CONTROLLED with MAXIMUM REUSE)
     scheduledID = simValues.IDvehicle;
-    [BRid] = BRreassignmentControlledMaxReuse(simValues.IDvehicle,BRid,scheduledID,allNeighborsID,appParams.NbeaconsT,appParams.NbeaconsF,indexNoBorder);
+    [BRid] = BRreassignmentControlledMaxReuse(simValues.IDvehicle,BRid,scheduledID,allNeighborsID,appParams.NbeaconsT,appParams.NbeaconsF,indexNoBorder,1);
 else
     % First BRs assignment (Always CONTROLLED)
     % BRid -> BR assigned
@@ -112,6 +112,7 @@ for snap = 1:simValues.snapshots
     
     % Print time to video
     elapsedTime = round(snap*appParams.Tbeacon*100)/100;
+
     if snap==1
         % Print first cycle without estimation of end
         msg = sprintf('%.1f / %.1fs',elapsedTime,simParams.simulationTime);
@@ -214,6 +215,7 @@ for snap = 1:simValues.snapshots
         % Row index -> index of the vehicle
         % Column = BRIDs assigned to vehicles in the awareness range
         awarenessBRid = BRidmatrix(awarenessID,BRid);
+        
         
         % Compute SINR of received beacons
         awarenessSINR = computeSINR(simValues.IDvehicle,BRid,appParams.NbeaconsT,appParams.NbeaconsF,awarenessID,RXpower,phyParams.IBEmatrix,phyParams.Ksi,phyParams.PtxERP_RB,phyParams.PnRB);
@@ -395,8 +397,9 @@ for snap = 1:simValues.snapshots
     elseif simParams.BRAlgorithm==7
         
         % BRs reassignment (CONTROLLED with MAXIMUM REUSE DISTANCE)
-        [BRid,~,NreassignNoBorder,~,NunlockedNoBorder] = BRreassignmentControlledMaxReuse(simValues.IDvehicle,BRid,scheduledID,allNeighborsID,appParams.NbeaconsT,appParams.NbeaconsF,indexNoBorder);
-        
+        [BRid,~,NreassignNoBorder,~,NunlockedNoBorder,BRidRT] = BRreassignmentControlledMaxReuse(simValues.IDvehicle,BRid,scheduledID,allNeighborsID,appParams.NbeaconsT,appParams.NbeaconsF,indexNoBorder,0,elapsedTime);
+        %disp(BRidRT);
+        %disp(BRid);
     elseif simParams.BRAlgorithm==8
         
         % BRs reassignment (3GPP MODE 4)
@@ -425,6 +428,11 @@ for snap = 1:simValues.snapshots
         [BRid,~,NreassignNoBorder,~,NunlockedNoBorder] = BRreassignmentOrdered(simValues.XvehicleReal,simValues.IDvehicle,BRid,appParams.Nbeacons,indexNoBorder);
         
     end
+    
+    % Successfully reassigned:
+    % Stop the timer here to record the receiver time.
+    
+    
     
     % Incremental sum of successfully reassigned and unlocked vehicles
     outputValues.NreassignNoBorderTOT = outputValues.NreassignNoBorderTOT + NreassignNoBorder;
