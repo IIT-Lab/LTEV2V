@@ -8,7 +8,7 @@ clc          % Clear the command window
 configFile = 'BenchmarkPoisson.cfg';
 
 % Simulation time (s)
-T = 10;cc
+T = 10;
 
 % Beacon size (bytes)
 B = 300;

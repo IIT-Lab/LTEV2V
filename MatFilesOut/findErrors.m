@@ -1,4 +1,4 @@
-function errorMatrix = findErrors(IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distance,gammaMin)
+function [errorMatrix,resultsID] = findErrors(IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distance,gammaMin,elapsedtime,timeNextPacket,lastSendTimeMatrix)
 % Detect wrongly decoded beacons and create Error Matrix
 % [ID RX, ID TX, BRid, distance]
 
@@ -6,6 +6,21 @@ Nv = length(IDvehicle);                   % Total number of vehicles
 errorMatrix = zeros(Nv*Nv-1,4);           % Initialize collision matrix
 Nerrors = 0;                              % Initialize number of errors
 
+
+ageMatrix = zeros(size(awarenessBRid));
+
+if lastSendTimeMatrix == 0
+    lastSendTimeMatrix = awarenessBRid;
+    for i = 1:Nv
+        index = find(awarenessID(i,:));
+        for j = 1:length(index)
+            lastSendTimeMatrix(i,index(j))=timeNextPacket(i);
+        end
+    end
+end    
+
+resultsID = awarenessBRid;
+wrongVehicle = [0];
 for i = 1:Nv
     index = find(awarenessID(i,:));
     if ~isempty(index)
@@ -17,10 +32,28 @@ for i = 1:Nv
                 errorMatrix(Nerrors,2) = awarenessID(i,index(j));
                 errorMatrix(Nerrors,3) = awarenessBRid(i,index(j));
                 errorMatrix(Nerrors,4) = distance(i,IDvehicle==awarenessID(i,index(j)));
-            end      
+                wrongVehicle = [wrongVehicle,IDvehicle(i)];
+                resultsID(i,index(j)) = -1; %failed communication no BRid
+            else
+                if awarenessSINR(i,index(j))>gammaMin && awarenessBRid(i,index(j))>0
+                    resultsID(i,index(j)) = awarenessBRid(i,index(j));
+
+                    ageMatrix(i,index(j)) = (elapsedtime+(awarenessBRid(i,index(j))*0.01)) - (lastSendTimeMatrix(i,index(j)));
+%                     if ageMatrix(i,index(j)) > 4
+%                         disp(elapsedtime+(awarenessBRid(i,index(j))*0.01));
+%                         disp(lastSendTimeMatrix(i,index(j)));
+%                     end    
+                    lastSendTimeMatrix(i,index(j)) = timeNextPacket(i);
+                end    
+            end    
+
         end
     end 
 end
+
+disp(ageMatrix);
+
+
 
 delIndex = errorMatrix(:,1)==0;
 errorMatrix(delIndex,:) = [];

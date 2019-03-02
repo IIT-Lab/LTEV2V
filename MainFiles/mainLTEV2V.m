@@ -96,6 +96,8 @@ end
 % Initialization of packet generation time
 timeNextPacket = appParams.Tbeacon * rand(simValues.maxID,1);
 
+% Initialization of time of last successfully sent packet.
+lastSendTimeMatirx = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Simulation Cycle
 
@@ -228,8 +230,16 @@ for snap = 1:simValues.snapshots
         
         % Error detection (within Raw)
         % Create Error Matrix = [ID RX, ID TX, BRid, distance]
-        errorMatrix = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin);
+        [errorMatrix,resultsID] = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin,elapsedtime,timeNextPacket,lastSendTimeMatirx);
         errorMatrixNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrix,indexNoBorder);
+        %disp(resultsID);
+        packetSendingTime = resultsID*0.01+elapsedtime;
+        %disp(elapsedtime);
+        for i = 1:Nv
+            latency=packetSendingTime-timeNextPacket(i);
+        disp(latency);
+        end
+       
         
     else
         
@@ -251,7 +261,7 @@ for snap = 1:simValues.snapshots
         end
         
         % Error detection (up to RawMax)
-        errorMatrixRawMax = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin);
+        errorMatrixRawMax = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatirx);
         errorMatrixRawMaxNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrixRawMax,indexNoBorder);
         
         % Error detection (within Raw)
