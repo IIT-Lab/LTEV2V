@@ -50,7 +50,7 @@ elseif simParams.BRAlgorithm==102
 elseif simParams.BRAlgorithm==7
     % Call first assignment of BR Algorithm 7 (CONTROLLED with MAXIMUM REUSE)
     scheduledID = simValues.IDvehicle;
-    [BRid] = BRreassignmentControlledMaxReuse(simValues.IDvehicle,BRid,scheduledID,allNeighborsID,appParams.NbeaconsT,appParams.NbeaconsF,indexNoBorder);
+    [BRid] = BRreassignmentControlledMaxReuse(simValues.IDvehicle,BRid,scheduledID,allNeighborsID,appParams.NbeaconsT,appParams.NbeaconsF,indexNoBorder,1);
 else
     % First BRs assignment (Always CONTROLLED)
     % BRid -> BR assigned
@@ -96,6 +96,8 @@ end
 % Initialization of packet generation time
 timeNextPacket = appParams.Tbeacon * rand(simValues.maxID,1);
 
+% Initialization of time of last successfully sent packet.
+lastSendTimeMatirx = 0;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Simulation Cycle
 
@@ -112,6 +114,7 @@ for snap = 1:simValues.snapshots
     
     % Print time to video
     elapsedTime = round(snap*appParams.Tbeacon*100)/100;
+
     if snap==1
         % Print first cycle without estimation of end
         msg = sprintf('%.1f / %.1fs',elapsedTime,simParams.simulationTime);
@@ -215,6 +218,7 @@ for snap = 1:simValues.snapshots
         % Column = BRIDs assigned to vehicles in the awareness range
         awarenessBRid = BRidmatrix(awarenessID,BRid);
         
+        
         % Compute SINR of received beacons
         awarenessSINR = computeSINR(simValues.IDvehicle,BRid,appParams.NbeaconsT,appParams.NbeaconsF,awarenessID,RXpower,phyParams.IBEmatrix,phyParams.Ksi,phyParams.PtxERP_RB,phyParams.PnRB);
         
@@ -226,8 +230,16 @@ for snap = 1:simValues.snapshots
         
         % Error detection (within Raw)
         % Create Error Matrix = [ID RX, ID TX, BRid, distance]
-        errorMatrix = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin);
+        [errorMatrix,resultsID] = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin,elapsedtime,timeNextPacket,lastSendTimeMatirx);
         errorMatrixNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrix,indexNoBorder);
+        %disp(resultsID);
+        packetSendingTime = resultsID*0.01+elapsedtime;
+        %disp(elapsedtime);
+        for i = 1:Nv
+            latency=packetSendingTime-timeNextPacket(i);
+        disp(latency);
+        end
+       
         
     else
         
@@ -249,7 +261,7 @@ for snap = 1:simValues.snapshots
         end
         
         % Error detection (up to RawMax)
-        errorMatrixRawMax = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin);
+        errorMatrixRawMax = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatirx);
         errorMatrixRawMaxNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrixRawMax,indexNoBorder);
         
         % Error detection (within Raw)
@@ -395,8 +407,9 @@ for snap = 1:simValues.snapshots
     elseif simParams.BRAlgorithm==7
         
         % BRs reassignment (CONTROLLED with MAXIMUM REUSE DISTANCE)
-        [BRid,~,NreassignNoBorder,~,NunlockedNoBorder] = BRreassignmentControlledMaxReuse(simValues.IDvehicle,BRid,scheduledID,allNeighborsID,appParams.NbeaconsT,appParams.NbeaconsF,indexNoBorder);
-        
+        [BRid,~,NreassignNoBorder,~,NunlockedNoBorder,BRidRT] = BRreassignmentControlledMaxReuse(simValues.IDvehicle,BRid,scheduledID,allNeighborsID,appParams.NbeaconsT,appParams.NbeaconsF,indexNoBorder,0,elapsedTime);
+        %disp(BRidRT);
+        %disp(BRid);
     elseif simParams.BRAlgorithm==8
         
         % BRs reassignment (3GPP MODE 4)
@@ -425,6 +438,11 @@ for snap = 1:simValues.snapshots
         [BRid,~,NreassignNoBorder,~,NunlockedNoBorder] = BRreassignmentOrdered(simValues.XvehicleReal,simValues.IDvehicle,BRid,appParams.Nbeacons,indexNoBorder);
         
     end
+    
+    % Successfully reassigned:
+    % Stop the timer here to record the receiver time.
+    
+    
     
     % Incremental sum of successfully reassigned and unlocked vehicles
     outputValues.NreassignNoBorderTOT = outputValues.NreassignNoBorderTOT + NreassignNoBorder;

@@ -1,7 +1,12 @@
-function [BRid, Nreassign, NreassignNoBorder, Nunlocked, NunlockedNoBorder] = BRreassignmentControlledMaxReuse(IDvehicle,BRid,scheduledID,allNeighborsID,NbeaconsT,NbeaconsF,indexNoBorder)
+function [BRid, Nreassign, NreassignNoBorder, Nunlocked, NunlockedNoBorder, BRidRT] = BRreassignmentControlledMaxReuse(IDvehicle,BRid,scheduledID,allNeighborsID,NbeaconsT,NbeaconsF,indexNoBorder,first,elapsedTime)
 % [CONTROLLED CASE WITH MAXIMUM REUSE]
 % Forcedly reassign BRs to the group of vehicles that have been scheduled,
 % using the maximum possible distance for reuse
+
+if ~first
+    disp(elapsedTime);
+end
+BRidRT = zeros(size(BRid));
 
 % Find IDs of new vehicles in the scenario (initially blocked)
 newVehicleID = find(BRid==-1);
@@ -57,6 +62,11 @@ for i = 1:Nscheduled
                     if nnz(beaconArrayF) == NbeaconsF
                         % All BRFs are used, choose the last one and update BRid
                         BRid(ID) = (BRF-1)*NbeaconsT+BRT;
+                        if ~first
+                            BRidRT(ID) = elapsedTime;
+                        end
+                        %disp(elapsedTime);
+                        %BRidRT(ID) = elapsedTime;
                         foundF = 1;
                         break
                     end     
@@ -86,7 +96,9 @@ for i = 1:Nscheduled
     
     % Update BRid of vehicle ID
     BRid(ID) = (BRF-1)*NbeaconsT+BRT;
-    
+    if ~first
+        BRidRT(ID) = elapsedTime;
+    end
     % Update allNeighborsBRid, allNeighborsBRTid, allNeighborsBRFid
     indices = allNeighborsID==ID;
     allNeighborsBRid(indices) = BRid(ID);
