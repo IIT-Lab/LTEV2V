@@ -25,6 +25,11 @@ for i = 1:Nv
     index = find(awarenessID(i,:));
     if ~isempty(index)
         for j = 1:length(index)
+            if elapsedtime+timeNextPacket(i)<awarenessBRid(i,index(j))*0.001
+                disp(timeNextPacket(i));
+                disp(awarenessBRid(i,index(j))*0.001);
+            end
+            
             % If received beacon SINR is lower than the threshold
             if awarenessSINR(i,index(j))<gammaMin && awarenessBRid(i,index(j))>0
                 Nerrors = Nerrors + 1;

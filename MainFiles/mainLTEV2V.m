@@ -448,7 +448,9 @@ for snap = 1:simValues.snapshots
     
 end
 
-histogram(transpose(res));
+filename=
+csvwrite(filename,M)
+%histogram(transpose(res));
 
 % Stop stopwatch
 outputValues.computationTime = toc;
