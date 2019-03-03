@@ -1,4 +1,4 @@
-function [errorMatrix,resultsID] = findErrors(IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distance,gammaMin,elapsedtime,timeNextPacket,lastSendTimeMatrix)
+function [errorMatrix,resultsID,res] = findErrors(IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distance,gammaMin,elapsedtime,timeNextPacket,lastSendTimeMatrix,res)
 % Detect wrongly decoded beacons and create Error Matrix
 % [ID RX, ID TX, BRid, distance]
 
@@ -37,23 +37,21 @@ for i = 1:Nv
             else
                 if awarenessSINR(i,index(j))>gammaMin && awarenessBRid(i,index(j))>0
                     resultsID(i,index(j)) = awarenessBRid(i,index(j));
-
-                    ageMatrix(i,index(j)) = (elapsedtime+(awarenessBRid(i,index(j))*0.01)) - (lastSendTimeMatrix(i,index(j)));
-%                     if ageMatrix(i,index(j)) > 4
-%                         disp(elapsedtime+(awarenessBRid(i,index(j))*0.01));
-%                         disp(lastSendTimeMatrix(i,index(j)));
-%                     end    
+                    ageMatrix(i,index(j)) = (elapsedtime+(awarenessBRid(i,index(j))*0.001)) - (lastSendTimeMatrix(i,index(j)));
                     lastSendTimeMatrix(i,index(j)) = timeNextPacket(i);
                 end    
             end    
-
         end
     end 
 end
 
-disp(ageMatrix);
 
 
+%%Process the ageMatrix for each simulation cycle
+%Get the non zero elements (Succeesful Age)
+ageMatrix= nonzeros(ageMatrix);
+
+res = [res ; ageMatrix];
 
 delIndex = errorMatrix(:,1)==0;
 errorMatrix(delIndex,:) = [];
