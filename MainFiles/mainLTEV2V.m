@@ -98,6 +98,11 @@ timeNextPacket = appParams.Tbeacon * rand(simValues.maxID,1);
 
 % Initialization of time of last successfully sent packet.
 lastSendTimeMatirx = 0;
+
+%Initialization of age Histogram
+res = [];
+firstPacketTransmitted =  0;
+HistogramMartix = zeros(4,20); %400meters X 0.01-0.2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Simulation Cycle
 
@@ -230,15 +235,10 @@ for snap = 1:simValues.snapshots
         
         % Error detection (within Raw)
         % Create Error Matrix = [ID RX, ID TX, BRid, distance]
-        [errorMatrix,resultsID] = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin,elapsedtime,timeNextPacket,lastSendTimeMatirx);
+        [errorMatrix,resultsID,res,lastSendTimeMatrix,firstPacketTransmitted,HistogramMartix] = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin,elapsedtime,timeNextPacket,lastSendTimeMatirx,ageHist,res,firstPacketTransmitted,HistogramMartix);
         errorMatrixNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrix,indexNoBorder);
-        %disp(resultsID);
-        packetSendingTime = resultsID*0.01+elapsedtime;
-        %disp(elapsedtime);
-        for i = 1:Nv
-            latency=packetSendingTime-timeNextPacket(i);
-        disp(latency);
-        end
+
+
        
         
     else
@@ -261,7 +261,7 @@ for snap = 1:simValues.snapshots
         end
         
         % Error detection (up to RawMax)
-        errorMatrixRawMax = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatirx);
+        [errorMatrixRawMax,resultsID,res,lastSendTimeMatrix,firstPacketTransmitted,HistogramMartix] = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatirx,res,firstPacketTransmitted,HistogramMartix);
         errorMatrixRawMaxNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrixRawMax,indexNoBorder);
         
         % Error detection (within Raw)
@@ -449,6 +449,12 @@ for snap = 1:simValues.snapshots
     outputValues.NunlockedNoBorderTOT = outputValues.NunlockedNoBorderTOT + NunlockedNoBorder;
     
 end
+
+%filename="OutputPeakValue.csv";
+%csvwrite(filename,res);
+
+filename = "HistogramMatrix.csv";
+csvwrite(filename,HistogramMartix);
 
 % Stop stopwatch
 outputValues.computationTime = toc;

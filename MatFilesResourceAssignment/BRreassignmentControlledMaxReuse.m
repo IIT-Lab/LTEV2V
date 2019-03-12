@@ -3,9 +3,6 @@ function [BRid, Nreassign, NreassignNoBorder, Nunlocked, NunlockedNoBorder, BRid
 % Forcedly reassign BRs to the group of vehicles that have been scheduled,
 % using the maximum possible distance for reuse
 
-if ~first
-    disp(elapsedTime);
-end
 BRidRT = zeros(size(BRid));
 
 % Find IDs of new vehicles in the scenario (initially blocked)

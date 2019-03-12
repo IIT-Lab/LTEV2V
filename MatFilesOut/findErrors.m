@@ -1,4 +1,4 @@
-function [errorMatrix,resultsID] = findErrors(IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distance,gammaMin,elapsedtime,timeNextPacket,lastSendTimeMatrix)
+function [errorMatrix,resultsID,res,lastSendTimeMatrix,firstPacketTransmitted,HistogramMartix] = findErrors(IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distance,gammaMin,elapsedtime,timeNextPacket,lastSendTimeMatrix,res,firstPacketTransmitted,HistogramMartix)
 % Detect wrongly decoded beacons and create Error Matrix
 % [ID RX, ID TX, BRid, distance]
 
@@ -8,6 +8,13 @@ Nerrors = 0;                              % Initialize number of errors
 
 
 ageMatrix = zeros(size(awarenessBRid));
+
+if firstPacketTransmitted == 0
+    firstPacketTransmitted = zeros(size(awarenessBRid));
+end    
+    
+
+
 
 if lastSendTimeMatrix == 0
     lastSendTimeMatrix = awarenessBRid;
@@ -25,6 +32,11 @@ for i = 1:Nv
     index = find(awarenessID(i,:));
     if ~isempty(index)
         for j = 1:length(index)
+            if elapsedtime+timeNextPacket(i)<awarenessBRid(i,index(j))*0.001
+                disp(timeNextPacket(i));
+                disp(awarenessBRid(i,index(j))*0.001);
+            end
+            
             % If received beacon SINR is lower than the threshold
             if awarenessSINR(i,index(j))<gammaMin && awarenessBRid(i,index(j))>0
                 Nerrors = Nerrors + 1;
@@ -35,27 +47,46 @@ for i = 1:Nv
                 wrongVehicle = [wrongVehicle,IDvehicle(i)];
                 resultsID(i,index(j)) = -1; %failed communication no BRid
             else
-                if awarenessSINR(i,index(j))>gammaMin && awarenessBRid(i,index(j))>0
+                if awarenessSINR(i  ,index(j))>gammaMin && awarenessBRid(i,index(j))>0
                     resultsID(i,index(j)) = awarenessBRid(i,index(j));
-
-                    ageMatrix(i,index(j)) = (elapsedtime+(awarenessBRid(i,index(j))*0.01)) - (lastSendTimeMatrix(i,index(j)));
-%                     if ageMatrix(i,index(j)) > 4
-%                         disp(elapsedtime+(awarenessBRid(i,index(j))*0.01));
-%                         disp(lastSendTimeMatrix(i,index(j)));
-%                     end    
+                    %received!
+                    ageMatrix(i,index(j)) = (elapsedtime+(awarenessBRid(i,index(j))*0.001)) - (lastSendTimeMatrix(i,index(j)));
+                    startPoint = lastSendTimeMatrix(i,index(j));
+                    dis=distance(i,index(j));
+                    endPoint = (elapsedtime+(awarenessBRid(i,index(j))*0.001));
+                    [HistogramMartix]=addtoHistogram(startPoint,endPoint,dis,HistogramMartix);  
+                    %nextpacket
                     lastSendTimeMatrix(i,index(j)) = timeNextPacket(i);
                 end    
             end    
-
         end
     end 
 end
 
-disp(ageMatrix);
 
 
+%%Process the ageMatrix for each simulation cycle
+%Get the non zero elements (Succeesful Age)
+ageMatrix= nonzeros(ageMatrix);
+
+res = [res ; ageMatrix];
 
 delIndex = errorMatrix(:,1)==0;
 errorMatrix(delIndex,:) = [];
 
+end
+
+function [HistogramMartix]= addtoHistogram(startPoint,endPoint,distance,HistogramMartix)
+i=startPoint;
+while i < endPoint
+    diff=i-startPoint; 
+    col = int8(diff*100)+1;
+    row = int8(distance/50)+1;
+    if row>size(HistogramMartix,1)
+        addRow = row - size(HistogramMartix,1);
+        HistogramMartix = [HistogramMartix;zeros(addRow,20)];
+    end    
+    HistogramMartix(row,col)=HistogramMartix(row,col)+1;    
+    i=i+0.01;
+end    
 end

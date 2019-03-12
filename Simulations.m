@@ -24,7 +24,7 @@ LTEV2Vsim(configFile,'simulationTime',T,'BRAlgorithm',7,'Treassign',2,'Raw',150,
 %% LTE Autonomous (3GPP Mode 4)
 % Autonomous allocation algorithm defined in 3GPP standard
 
-LTEV2Vsim(configFile,'simulationTime',T,'BRAlgorithm',8,'Raw',150,...
-    'beaconSizeBytes',B);
+% LTEV2Vsim(configFile,'simulationTime',T,'BRAlgorithm',8,'Raw',150,...
+%     'beaconSizeBytes',B);
 
 

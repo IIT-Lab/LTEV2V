@@ -16,7 +16,7 @@ YvehicleReal = YvehicleReal(indexOrder);
 % Find IDs of vehicles that are exiting the scenario
 IDvehicleExit = setdiff(oldIDvehicle,IDvehicle);
 
-% Find indices of vehicles in IDvehicle that are both in IDvehicle and OldIDvehicle
+% Find indices of  vehicles in IDvehicle that are both in IDvehicle and OldIDvehicle
 indexOldVehicles = find(ismember(IDvehicle,oldIDvehicle));
 
 % Find indices of vehicles in OldIDvehicle that are both in IDvehicle and OldIDvehicle
