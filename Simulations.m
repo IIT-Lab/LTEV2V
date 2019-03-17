@@ -1,4 +1,4 @@
-close all    % Close all open figures
+close all    % Cl?ose all open figures
 clear        % Reset variables
 clc          % Clear the command window
 

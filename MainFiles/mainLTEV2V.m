@@ -102,7 +102,7 @@ lastSendTimeMatirx = 0;
 %Initialization of age Histogram
 res = [];
 firstPacketTransmitted =  0;
-HistogramMartix = zeros(4,20); %400meters X 0.01-0.2
+HistogramMartix = zeros(16,20); %15*10meters =150 X 0.01-0.2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Simulation Cycle
 

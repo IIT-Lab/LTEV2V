@@ -13,9 +13,6 @@ if firstPacketTransmitted == 0
     firstPacketTransmitted = zeros(size(awarenessBRid));
 end    
     
-
-
-
 if lastSendTimeMatrix == 0
     lastSendTimeMatrix = awarenessBRid;
     for i = 1:Nv
@@ -32,11 +29,8 @@ for i = 1:Nv
     index = find(awarenessID(i,:));
     if ~isempty(index)
         for j = 1:length(index)
-            if elapsedtime+timeNextPacket(i)<awarenessBRid(i,index(j))*0.001
-                disp(timeNextPacket(i));
-                disp(awarenessBRid(i,index(j))*0.001);
-            end
-            
+            dis=distance(i,IDvehicle==awarenessID(i,index(j)));
+
             % If received beacon SINR is lower than the threshold
             if awarenessSINR(i,index(j))<gammaMin && awarenessBRid(i,index(j))>0
                 Nerrors = Nerrors + 1;
@@ -47,16 +41,20 @@ for i = 1:Nv
                 wrongVehicle = [wrongVehicle,IDvehicle(i)];
                 resultsID(i,index(j)) = -1; %failed communication no BRid
             else
-                if awarenessSINR(i  ,index(j))>gammaMin && awarenessBRid(i,index(j))>0
+                if awarenessSINR(i,index(j))>gammaMin && awarenessBRid(i,index(j))>0 && dis<=150
                     resultsID(i,index(j)) = awarenessBRid(i,index(j));
                     %received!
                     ageMatrix(i,index(j)) = (elapsedtime+(awarenessBRid(i,index(j))*0.001)) - (lastSendTimeMatrix(i,index(j)));
                     startPoint = lastSendTimeMatrix(i,index(j));
-                    dis=distance(i,index(j));
                     endPoint = (elapsedtime+(awarenessBRid(i,index(j))*0.001));
                     [HistogramMartix]=addtoHistogram(startPoint,endPoint,dis,HistogramMartix);  
                     %nextpacket
-                    lastSendTimeMatrix(i,index(j)) = timeNextPacket(i);
+                    if timeNextPacket(i)>elapsedtime+awarenessBRid(i,index(j))*0.001
+                        lastSendTimeMatrix(i,index(j)) = timeNextPacket(i)+0.1
+                    else    
+                        lastSendTimeMatrix(i,index(j)) = timeNextPacket(i);
+                    end
+                    
                 end    
             end    
         end
@@ -77,15 +75,14 @@ errorMatrix(delIndex,:) = [];
 end
 
 function [HistogramMartix]= addtoHistogram(startPoint,endPoint,distance,HistogramMartix)
+binsize = 10;
 i=startPoint;
 while i < endPoint
     diff=i-startPoint; 
-    col = int8(diff*100)+1;
-    row = int8(distance/50)+1;
-    if row>size(HistogramMartix,1)
-        addRow = row - size(HistogramMartix,1);
-        HistogramMartix = [HistogramMartix;zeros(addRow,20)];
-    end    
+    col = int16(diff*100)+1;
+    row = int16(distance/binsize)+1;
+    %distance will neve exceed 150m
+    
     HistogramMartix(row,col)=HistogramMartix(row,col)+1;    
     i=i+0.01;
 end    
