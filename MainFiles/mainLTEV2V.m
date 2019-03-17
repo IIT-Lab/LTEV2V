@@ -453,7 +453,7 @@ end
 %filename="OutputPeakValue.csv";
 %csvwrite(filename,res);
 
-filename = "HistogramMatrix_Benchmark_rho_200.csv";
+filename = "HistogramMatrix_Benchmark_rho_300.csv";
 csvwrite(filename,HistogramMartix);
 
 % Stop stopwatch
