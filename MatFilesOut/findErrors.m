@@ -83,7 +83,7 @@ while i < endPoint
     row = int16(distance/binsize)+1;
     %distance will neve exceed 150m
     
-    HistogramMartix(row,col)=HistogramMartix(row,col)+1;    
+    HistogramMartix(row,col)=int64(HistogramMartix(row,col))+1;    
     i=i+0.01;
 end    
 end
