@@ -101,6 +101,10 @@ lastSendTimeMatrix = 0;
 
 %Initialization of age Histogram
 
+<<<<<<< HEAD
+=======
+firstPacketTransmitted =  0;
+>>>>>>> 771daf6029ada29759c31ea0c9c6174f8a6ef75e
 HistogramMatrix = zeros(16,21); %15*10meters =150 X 0.01-0.2
 binSize = 10; %10 meters
 
@@ -236,11 +240,17 @@ for snap = 1:simValues.snapshots
         
         % Error detection (within Raw)
         % Create Error Matrix = [ID RX, ID TX, BRid, distance]
+<<<<<<< HEAD
 %         Rawmsg = sprintf('Using Raw with 150');
 %         fprintf(Rawmsg);
         [errorMatrix] = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin);
         errorMatrixNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrix,indexNoBorder);
         [lastSendTimeMatrix,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,awarenessID,binSize,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,HistogramMatrix);
+=======
+        [errorMatrix] = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin);
+        errorMatrixNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrix,indexNoBorder);
+        [lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,awarenessID,binSize,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix);
+>>>>>>> 771daf6029ada29759c31ea0c9c6174f8a6ef75e
 
 
        
@@ -267,9 +277,13 @@ for snap = 1:simValues.snapshots
         % Error detection (up to RawMax)
         errorMatrixRawMax = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin);
         errorMatrixRawMaxNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrixRawMax,indexNoBorder);
+<<<<<<< HEAD
 %         Rawmsg = sprintf('Using RawMax with 380');
 %         fprintf(Rawmsg);
         [lastSendTimeMatrix,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,neighborsID,binSize,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,HistogramMatrix);
+=======
+        [lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,neighborsID,binSize,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix);
+>>>>>>> 771daf6029ada29759c31ea0c9c6174f8a6ef75e
 
         % Error detection (within Raw)
         errorMatrix = errorMatrixRawMax(errorMatrixRawMax(:,4)<phyParams.Raw,:);
@@ -460,7 +474,11 @@ end
 %filename="OutputPeakValue.csv";
 %csvwrite(filename,res);
 
+<<<<<<< HEAD
 filename = "HistogramMatrix_Benchmark_not_moving.csv";
+=======
+filename = "HistogramMatrix_Benchmark_rho_200.csv";
+>>>>>>> 771daf6029ada29759c31ea0c9c6174f8a6ef75e
 csvwrite(filename,HistogramMatrix);
 
 % Stop stopwatch
