@@ -18,7 +18,7 @@ B = 300;
 % Parameters:
 % - Interval of scheduled reassignment: Treassign (s)
 
-LTEV2Vsim(configFile,'simulationTime',T,'BRAlgorithm',7,'Treassign',2,'Raw',150,...
+LTEV2Vsim(configFile,'simulationTime',T,'BRAlgorithm',1,'Treassign',2,'Raw',150,...
     'beaconSizeBytes',B);
 
 %% LTE Autonomous (3GPP Mode 4)
