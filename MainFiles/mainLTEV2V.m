@@ -237,6 +237,7 @@ for snap = 1:simValues.snapshots
         
         % Error detection (within Raw)
         % Create Error Matrix = [ID RX, ID TX, BRid, distance]
+        disp("Using Raw");
         [errorMatrix] = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin);
         errorMatrixNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrix,indexNoBorder);
         [lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,awarenessID,binSize,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix);
@@ -264,6 +265,7 @@ for snap = 1:simValues.snapshots
         end
         
         % Error detection (up to RawMax)
+        disp("Using RawMAX");
         errorMatrixRawMax = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin);
         errorMatrixRawMaxNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrixRawMax,indexNoBorder);
         [lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,neighborsID,binSize,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix);
@@ -454,8 +456,6 @@ for snap = 1:simValues.snapshots
     
 end
 
-%filename="OutputPeakValue.csv";
-%csvwrite(filename,res);
 
 filename = "HistogramMatrix_Benchmark_rho_200.csv";
 csvwrite(filename,HistogramMatrix);
