@@ -101,7 +101,6 @@ lastSendTimeMatrix = 0;
 
 %Initialization of age Histogram
 
-firstPacketTransmitted =  0;
 HistogramMatrix = zeros(16,21); %15*10meters =150 X 0.01-0.2
 binSize = 10; %10 meters
 
@@ -237,10 +236,12 @@ for snap = 1:simValues.snapshots
         
         % Error detection (within Raw)
         % Create Error Matrix = [ID RX, ID TX, BRid, distance]
-        disp("Using Raw");
+
+%         Rawmsg = sprintf('Using Raw with 150');
+%         fprintf(Rawmsg);
         [errorMatrix] = findErrors(simValues.IDvehicle,awarenessID,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin);
         errorMatrixNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrix,indexNoBorder);
-        [lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,awarenessID,binSize,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix);
+        [lastSendTimeMatrix,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,awarenessID,binSize,awarenessSINR,awarenessBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,HistogramMatrix);
 
 
        
@@ -268,7 +269,9 @@ for snap = 1:simValues.snapshots
         disp("Using RawMAX");
         errorMatrixRawMax = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin);
         errorMatrixRawMaxNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrixRawMax,indexNoBorder);
-        [lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,neighborsID,binSize,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,firstPacketTransmitted,HistogramMatrix);
+%         Rawmsg = sprintf('Using RawMax with 380');
+%         fprintf(Rawmsg);
+        [lastSendTimeMatrix,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,neighborsID,binSize,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,HistogramMatrix);
 
         % Error detection (within Raw)
         errorMatrix = errorMatrixRawMax(errorMatrixRawMax(:,4)<phyParams.Raw,:);
@@ -457,7 +460,7 @@ for snap = 1:simValues.snapshots
 end
 
 
-filename = "HistogramMatrix_Benchmark_rho_200.csv";
+filename = "HistogramMatrix_Benchmark_not_moving.csv";
 csvwrite(filename,HistogramMatrix);
 
 % Stop stopwatch
