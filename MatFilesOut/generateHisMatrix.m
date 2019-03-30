@@ -5,17 +5,17 @@ function [lastSendTimeMatrix,HistogramMatrix] = generateHisMatrix(IDvehicle,awar
 Nv = length(IDvehicle);                   % Total number of vehicles
 
 
-if lastSendTimeMatrix == 0 %Initialization
-    lastSendTimeMatrix = zeros(size(awarenessBRid));
+if lastSendTimeMatrix == -1 %Initialization
+    lastSendTimeMatrix = -1*ones(size(awarenessBRid));
     for i = 1:Nv
         index = find(awarenessID(i,:));
         for j = 1:length(index)
-            lastSendTimeMatrix(i,index(j))=timeNextPacket(i);   
+            if awarenessSINR(i,index(j))>gammaMin && awarenessBRid(i,index(j))>0
+                lastSendTimeMatrix(i,index(j))=timeNextPacket(i);   
+            end
         end
     end
 end    
-
-
 
 
 for i = 1:Nv %i = send vehicle
@@ -29,8 +29,8 @@ for i = 1:Nv %i = send vehicle
                 %do nothing
                 %the LastSendTimeMatrix Maintains its value
             else
-                if awarenessSINR(i  ,index(j))>gammaMin && awarenessBRid(i,index(j))>0
-                    %received!
+                if awarenessSINR(i  ,index(j))>gammaMin && awarenessBRid(i,index(j))>0 && lastSendTimeMatrix(i,index(j))~=-1
+                    %received!  
                     startPoint = lastSendTimeMatrix(i,index(j));
                     dis=distance(i,IDvehicle==awarenessID(i,index(j))); %distance between two cars
                     endPoint = (elapsedtime+(awarenessBRid(i,index(j))*0.001));
@@ -59,6 +59,7 @@ while i < endPoint
     col = int64(diff*100)+1;     
     row = int64(distance/binSize)+1; 
     [m,n] = size(HistogramMatrix);
+    
     if row>m
         addRow = row - m;
         HistogramMatrix = [HistogramMatrix;zeros(addRow,n)];    %Add Rows

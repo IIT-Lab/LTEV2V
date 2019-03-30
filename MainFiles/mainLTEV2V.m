@@ -97,12 +97,13 @@ end
 timeNextPacket = appParams.Tbeacon * rand(simValues.maxID,1);
 
 % Initialization of time of last successfully sent packet.
-lastSendTimeMatrix = 0;
+lastSendTimeMatrix = -1;
 
 %Initialization of age Histogram
 
 HistogramMatrix = zeros(16,21); %15*10meters =150 X 0.01-0.2
 binSize = 10; %10 meters
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Simulation Cycle
