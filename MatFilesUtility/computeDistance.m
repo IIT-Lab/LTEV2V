@@ -1,8 +1,10 @@
-function [distance,awarenessID,neighborsDistance,neighborsID,allNeighborsID] = computeDistance(Xvehicle,Yvehicle,IDvehicle,Raw,RawMax)
+function [distance,awarenessID,neighborsDistance,neighborsID,allNeighborsID] = computeDistance(Xvehicle,Yvehicle,IDvehicle,Raw,RawMax,Xmax)
 % Compute distances and create awareness matrix
 
 % Compute distance matrix
-distance = sqrt((Xvehicle - Xvehicle').^2+(Yvehicle - Yvehicle').^2);
+%distance = sqrt((Xvehicle - Xvehicle').^2+(Yvehicle - Yvehicle').^2);
+
+distance = sqrt( min(Xvehicle - Xvehicle',Xmax - (Xvehicle - Xvehicle') ).^2+(Yvehicle - Yvehicle').^2);
 
 % Sort distance matrix and indices in ascending order (by columns)
 [neighborsDistance, neighborsIndex] = sort(distance,2);
