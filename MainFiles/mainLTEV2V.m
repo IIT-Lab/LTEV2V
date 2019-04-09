@@ -24,7 +24,7 @@ indexNoBorder = find((simValues.XvehicleReal(:,1)>=(simValues.Xmin+simParams.Mbo
 % Distance matrix has dimensions equal to IDvehicle x IDvehicle in order to
 % speed up the computation (only vehicles present at the considered instant)
 % distance(i,j): distance from vehicle with index i to vehicle with index j
-[distance,~,~,~,allNeighborsID] = computeDistance(simValues.Xvehicle,simValues.Yvehicle,simValues.IDvehicle,phyParams.Raw,phyParams.RawMax);
+[distance,~,~,~,allNeighborsID] = computeDistance(simValues.Xvehicle,simValues.Yvehicle,simValues.IDvehicle,phyParams.Raw,phyParams.RawMax,simValues.Xmax);
 
 % Save distance matrix
 distanceRealOld = distance;
@@ -98,11 +98,14 @@ timeNextPacket = appParams.Tbeacon * rand(simValues.maxID,1);
 
 % Initialization of time of last successfully sent packet.
 lastSendTimeMatrix = -1;
+lastGenTimeMatrix = -1;    % ALEX --> Added
 
 %Initialization of age Histogram
 
 HistogramMatrix = zeros(16,21); %15*10meters =150 X 0.01-0.2
-binSize = 10; %10 meters
+% ALEX --> bin sizes
+binTime = 0.01;     % 10 milliseconds
+binDist = 10; %10 meters
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -183,11 +186,11 @@ for snap = 1:simValues.snapshots
         
         % Call function to compute distances
         % distance(i,j): distance from vehicle with index i to vehicle with index j
-        [distanceReal,awarenessID,neighborsDistance,neighborsID,allNeighborsID] = computeDistance(simValues.XvehicleReal,simValues.YvehicleReal,simValues.IDvehicle,phyParams.Raw,phyParams.RawMax);
+        [distanceReal,awarenessID,neighborsDistance,neighborsID,allNeighborsID] = computeDistance(simValues.XvehicleReal,simValues.YvehicleReal,simValues.IDvehicle,phyParams.Raw,phyParams.RawMax,simValues.Xmax);
         if ~simParams.posError95 && NPosUpdate==1
             distance = distanceReal;
         else
-            [distance,~,~,~,allNeighborsID] = computeDistance(simValues.Xvehicle,simValues.Yvehicle,simValues.IDvehicle,phyParams.Raw,phyParams.RawMax);
+            [distance,~,~,~,allNeighborsID] = computeDistance(simValues.Xvehicle,simValues.Yvehicle,simValues.IDvehicle,phyParams.Raw,phyParams.RawMax,simValues.Xmax);
         end
         
         % Call function to update distance matrix where D(i,j) is the
@@ -267,12 +270,14 @@ for snap = 1:simValues.snapshots
         end
         
         % Error detection (up to RawMax)
-        disp("Using RawMAX");
+%        disp("Using RawMAX");
         errorMatrixRawMax = findErrors(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin);
         errorMatrixRawMaxNoBorder = errorRemoveBorder(simValues.IDvehicle,errorMatrixRawMax,indexNoBorder);
 %         Rawmsg = sprintf('Using RawMax with 380');
 %         fprintf(Rawmsg);
-        [lastSendTimeMatrix,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,neighborsID,binSize,neighborsSINR,neighborsBRid,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastSendTimeMatrix,HistogramMatrix);
+
+        % ALEX --> changed arguments
+        [lastGenTimeMatrix,lastSendTimeMatrix,HistogramMatrix] = generateHisMatrix(simValues.IDvehicle,neighborsID,neighborsSINR,neighborsBRid,appParams.NbeaconsT,distanceReal,phyParams.gammaMin,elapsedTime,timeNextPacket,lastGenTimeMatrix,lastSendTimeMatrix,HistogramMatrix,binTime,binDist);
 
         % Error detection (within Raw)
         errorMatrix = errorMatrixRawMax(errorMatrixRawMax(:,4)<phyParams.Raw,:);
@@ -462,7 +467,14 @@ end
 
 
 filename = "HistogramMatrix_Benchmark_not_moving.csv";
-csvwrite(filename,HistogramMatrix);
+% ALEX --> CHANGED CSV FORMAT: csvwrite() saves in scientific notation
+% which causes rounding errors
+%csvwrite(filename,HistogramMatrix);
+fid = fopen( filename, 'w' );
+assert( fid >= 3, 'ERROR opening %s', filename );
+formatString = ['%u' repmat( ',%u', 1, size(HistogramMatrix,2) - 1 ) '\n'];  
+fprintf( fid, formatString , HistogramMatrix' );
+fclose( fid );
 
 % Stop stopwatch
 outputValues.computationTime = toc;
