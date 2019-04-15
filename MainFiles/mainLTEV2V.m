@@ -102,7 +102,7 @@ lastGenTimeMatrix = -1;    % ALEX --> Added
 
 %Initialization of age Histogram
 
-HistogramMatrix = zeros(16,21); %15*10meters =150 X 0.01-0.2
+HistogramMatrix = zeros(39,20); %15*10meters =150 X 0.01-0.2
 % ALEX --> bin sizes
 binTime = 0.01;     % 10 milliseconds
 binDist = 10; %10 meters
