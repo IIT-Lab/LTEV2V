@@ -24,8 +24,8 @@ indexNoBorder = find((simValues.XvehicleReal(:,1)>=(simValues.Xmin+simParams.Mbo
 % Distance matrix has dimensions equal to IDvehicle x IDvehicle in order to
 % speed up the computation (only vehicles present at the considered instant)
 % distance(i,j): distance from vehicle with index i to vehicle with index j
-[distance,~,~,~,allNeighborsID] = computeDistance(simValues.Xvehicle,simValues.Yvehicle,simValues.IDvehicle,phyParams.Raw,phyParams.RawMax,simValues.Xmax);
 
+[distance,~,~,~,allNeighborsID] = computeDistance(simValues.Xvehicle,simValues.Yvehicle,simValues.IDvehicle,phyParams.Raw,phyParams.RawMax,simValues.Xmax);
 % Save distance matrix
 distanceRealOld = distance;
 
@@ -465,6 +465,9 @@ for snap = 1:simValues.snapshots
     
 end
 
+PlotCDF(HistogramMatrix);
+PlotPDF(HistogramMatrix);
+PlotDisPDF(distance);
 
 filename = "HistogramMatrix_Benchmark_not_moving.csv";
 % ALEX --> CHANGED CSV FORMAT: csvwrite() saves in scientific notation
